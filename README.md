@@ -93,7 +93,38 @@ In this exercise you will:
 #### Reflection Questions
 
 1. **What steps are required to open an X11 window and receive events?**
+
+**Lösung zu Aufgabe 1:**
+Um ein X11-Fenster zu öffnen und Events zu empfangen, sind diese Schritte nötig:
+
+- *Display-Verbindung öffnen*:
+  Mit `XOpenDisplay(NULL)` eine Verbindung zum X-Server herstellen (meistens der lokale X-Server).
+
+- *Screen auswählen:*
+  Mit `DefaultScreen(dpy)` den Standardbildschirm bestimmen.
+
+- *Fenster erstellen:*
+  Mit `XCreateSimpleWindow()` oder `XCreateWindow()` ein neues Fenster auf dem Root-Window des Bildschirms anlegen. Dabei Position, Größe, Rahmenstärke und Farben festlegen.
+
+- *Events erhalten:*
+  Mit `XSelectInput()` den Event-Masken (z. B. `ExposureMask`, `KeyPressMask`) festlegen, welche Ereignisse das Fenster erhalten soll.
+
+- *Fenster anzeigen:*
+  Mit `XMapWindow()`das Fenster sichtbar machen.
+
+- *Grafik-Kontext erstellen:*
+  Mit `XCreateGC()` einen Grafik-Kontext für das Fenster anlegen, um später zeichnen zu können.
+
+- *Event-Schleife starten:*
+  Mit einer Endlosschleife `XNextEvent()` auf neue Events warten und diese abarbeiten.
+  
 2. **How does the `Expose` event trigger your drawing code?**
+
+**Lösung zu Aufgabe 2:**
+
+- Der **Expose-Event** signalisiert, dass ein Teil (oder das ganze Fenster) neu gezeichnet werden muss, z. B. weil das Fenster gerade sichtbar geworden ist oder überdeckt war.
+- Sobald `XNextEvent()` ein Event vom Typ `Expose` liefert, führt das Programm im Event-Handler den Zeichen-Code aus (z. B. `XDrawRectangle()`), um die Grafik im Fenster zu aktualisieren.
+- Ohne diese Reaktion auf Expose-Events würde das Fenster nach dem Öffnen oder Wiederfreigeben leer oder unvollständig bleiben.
 
 ---
 
@@ -153,7 +184,33 @@ In this exercise you will:
 #### Reflection Questions
 
 1. **How does GTK’s signal-and-callback mechanism differ from X11’s event loop?**
+
+**Lösung zu Aufgabe 1:**
+
+**X11:**
+- Arbeitet mit einem **low-level Event-Loop**, der direkt vom Programm implementiert wird.
+- Man ruft `XNextEvent()` in einer Schleife auf, um Events vom X-Server abzuholen.
+- Dann wird der Event-Typ geprüft (z. B. `Expose`, `KeyPress`) und der entsprechende Code ausgeführt.
+- Die Steuerung liegt komplett beim Programmierer.
+  
+ **GTK:**
+ - Baut auf X11 (oder anderen Window-Systemen) auf, abstrahiert das Event-Handling.
+ - Verwendet ein **Signal- und Callback-System**:
+ - Widgets senden Signale (z. B. „clicked“, „destroy“).
+ - Man verbindet (connectet) Callback-Funktionen mit diesen Signalen.
+ - Das GTK-Framework verwaltet intern die Event-Schleife und ruft die Callback-Funktionen auf, wenn das Signal        ausgelöst wird.
+ - Bietet eine höhere Abstraktion und mehr Komfort, da man sich nicht um Details des Event-Pollings kümmern musst.
+
 2. **Why use `pkg-config` when compiling GTK applications?**
+
+**Lösung zu Aufgabe 2:**
+
+- GTK+ ist eine umfangreiche Bibliothek mit vielen Abhängigkeiten und spezifischen Compiler- und Linker-Flags (z. B. Include-Pfade, Linker-Optionen).
+- `pkg-config` stellt sicher, dass man:
+- Alle notwendigen **Compiler-Optionen** (`--cflags`) bekommt (z. B. Pfade zu Header-Dateien).
+- Alle notwendigen **Linker-Optionen** (`--libs`) bekommt (z. B. GTK-Bibliotheken, Abhängigkeiten).
+- Dadurch werden Fehler beim Kompilieren und Linken vermieden.
+- Außerdem sorgt es für **Portabilität**: Egal, wo GTK auf dem System installiert ist, `pkg-config` findet die richtigen Einstellungen.
 
 ---
 
